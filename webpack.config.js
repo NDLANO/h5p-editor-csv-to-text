@@ -1,12 +1,19 @@
-const path = require('path');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+import path from 'path';
+import { fileURLToPath } from 'url';
+import process from 'node:process';
+import MiniCssExtractPlugin from 'mini-css-extract-plugin';
+import unpluginJsonDts from 'unplugin-json-dts/webpack';
 
-const mode = process.argv.includes('--mode=production') ?
-  'production' : 'development';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const mode = process.argv.includes('--mode=production')
+  ? 'production'
+  : 'development';
 const isDev = mode !== 'production';
 
-const config = {
-  mode: mode,
+export default {
+  mode,
   entry: {
     'h5p-editor-csv-to-text': path.join(
       __dirname,
@@ -22,7 +29,7 @@ const config = {
     new MiniCssExtractPlugin({
       filename: '[name].css',
     }),
-    require('unplugin-json-dts/webpack')(),
+    unpluginJsonDts(),
   ],
   resolve: {
     modules: [path.resolve('./src'), path.resolve('./node_modules')],
@@ -35,9 +42,7 @@ const config = {
         use: [
           {
             loader: 'babel-loader',
-            options: {
-              presets: ['@babel/preset-env'],
-            },
+            options: { presets: ['@babel/preset-env'] },
           },
           { loader: 'ts-loader' },
         ],
@@ -46,12 +51,8 @@ const config = {
       {
         test: /\.css$/,
         use: [
-          {
-            loader: 'style-loader',
-          },
-          {
-            loader: 'css-loader',
-          },
+          { loader: 'style-loader' },
+          { loader: 'css-loader' },
         ],
       },
     ],
@@ -73,10 +74,5 @@ const config = {
       },
     },
   },
+  ...(isDev && { devtool: 'inline-source-map' }),
 };
-
-if (isDev) {
-  config.devtool = 'inline-source-map';
-}
-
-module.exports = config;
